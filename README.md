@@ -1,5 +1,32 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+-- Proteção contra kick
+local mt = getrawmetatable(game)
+setreadonly(mt, false)
+
+local oldNamecall = mt.__namecall
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    if tostring(method):lower() == "kick" then
+        warn("Tentaram te kickar, bloqueado!")
+        return nil
+    end
+    return oldNamecall(self, ...)
+end)
+
+local oldIndex = mt.__index
+mt.__index = newcclosure(function(self, key)
+    if tostring(key):lower() == "kick" then
+        return function()
+            warn("Kick bloqueado!")
+        end
+    end
+    return oldIndex(self, key)
+end)
+
+setreadonly(mt, true)
+
+
 local Window = Rayfield:CreateWindow({
    Name = "Frostz Hub",
    Icon = nil, -- ou assetId válido em string
