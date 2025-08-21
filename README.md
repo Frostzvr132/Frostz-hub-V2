@@ -1,16 +1,5 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- Anti-Kick simples
-local Players = game:GetService("Players")
-local lp = Players.LocalPlayer
-
--- Bloqueia :Kick()
-lp.Kick = function(...) 
-    warn("Kick bloqueado!") 
-end
-lp.kick = lp.Kick -- compatibilidade
-
-
 local Window = Rayfield:CreateWindow({
    Name = "Frostz Hub",
    Icon = nil, -- ou assetId válido em string
