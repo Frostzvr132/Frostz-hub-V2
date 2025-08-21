@@ -50,6 +50,20 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
 
+-- Adiciona borda RGB apenas no Hub
+local Border = Instance.new("UIStroke")
+Border.Thickness = 2
+Border.Parent = MainFrame
+
+spawn(function()
+	local hue = 0
+	while MainFrame and MainFrame.Parent do
+		hue = (hue + 1) % 360
+		Border.Color = Color3.fromHSV(hue/360, 1, 1)
+		wait(0.03)
+	end
+end)
+
 -- Label de título
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
@@ -90,6 +104,7 @@ local function CriarBotao(nome, ordem, callback)
 	Botao.MouseButton1Click:Connect(callback)
 end
 
+
 -- Criando botões do hub
 CriarBotao("Miranda Tween", 1, function()
 	loadstring(game:HttpGet("https://pastefy.app/mTbfVy0H/raw", true))()
@@ -101,7 +116,7 @@ CriarBotao("Lennon Tween", 3, function()
 	loadstring(game:HttpGet("https://pastefy.app/1FPEhJmq/raw"))()
 end)
 
--- Botão de abrir/fechar Hub
+-- Botão de abrir/fechar Hub (inicia invisível)
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Size = UDim2.new(0, 120, 0, 40)
 ToggleButton.Position = UDim2.new(0, 20, 0.8, 0)
@@ -110,6 +125,7 @@ ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.Text = "Abrir/Fechar Hub"
 ToggleButton.Font = Enum.Font.GothamBold
 ToggleButton.TextSize = 14
+ToggleButton.Visible = false
 ToggleButton.Parent = ScreenGui
 
 local corner2 = Instance.new("UICorner")
@@ -177,6 +193,7 @@ local function CriarTelaKey()
 				SaveKey(key)
 				KeyFrame:Destroy()
 				MainFrame.Visible = true
+				ToggleButton.Visible = true -- aparece só depois da key válida
 				return
 			end
 		end
@@ -200,8 +217,5 @@ if not isValid then
 	CriarTelaKey()
 else
 	MainFrame.Visible = true
+	ToggleButton.Visible = true
 end
-
-
-
-print("Melhor Painel De script Pagos De todos os tempos😈😈")
