@@ -105,6 +105,32 @@ local function CriarBotao(nome, ordem, callback)
 end
 
 
+-- Função ESP Players
+local function ESPPlayers()
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
+			local head = plr.Character.Head
+			if not head:FindFirstChild("ESP_Player") then
+				local Billboard = Instance.new("BillboardGui")
+				Billboard.Name = "ESP_Player"
+				Billboard.Size = UDim2.new(0,100,0,30)
+				Billboard.Adornee = head
+				Billboard.AlwaysOnTop = true
+				Billboard.Parent = head
+
+				local Label = Instance.new("TextLabel")
+				Label.Size = UDim2.new(1,0,1,0)
+				Label.BackgroundTransparency = 1
+				Label.Text = plr.Name
+				Label.TextColor3 = Color3.fromRGB(0,255,0)
+				Label.TextScaled = true
+				Label.Font = Enum.Font.GothamBold
+				Label.Parent = Billboard
+			end
+		end
+	end
+end
+
 -- Criando botões do hub
 CriarBotao("Miranda Tween", 1, function()
 	loadstring(game:HttpGet("https://pastefy.app/mTbfVy0H/raw", true))()
@@ -115,6 +141,7 @@ end)
 CriarBotao("Lennon Tween", 3, function()
 	loadstring(game:HttpGet("https://pastefy.app/1FPEhJmq/raw"))()
 end)
+CriarBotao("ESP Players", 4, ESPPlayers) -- botão ESP Players
 
 -- Botão de abrir/fechar Hub (inicia invisível)
 local ToggleButton = Instance.new("TextButton")
