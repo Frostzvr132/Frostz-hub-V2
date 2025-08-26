@@ -2,17 +2,16 @@
 
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
 local player = Players.LocalPlayer
 
 -- Nome do arquivo (DataStore local exploit usa writefile/readfile)
 local KeyFile = "FrostzHubKey.json"
 
 -- Lista de keys válidas
-local ValidKeys = {
-	"Frostz Hub",
-	"Viny",
-	"Frostz Fire"
-}
+local ValidKeys = { "Frostz Hub", "Viny", "Frostz Fire" }
 
 -- Função para salvar key
 local function SaveKey(key)
@@ -55,12 +54,12 @@ local Border = Instance.new("UIStroke")
 Border.Thickness = 2
 Border.Parent = MainFrame
 
-spawn(function()
+task.spawn(function()
 	local hue = 0
 	while MainFrame and MainFrame.Parent do
 		hue = (hue + 1) % 360
 		Border.Color = Color3.fromHSV(hue/360, 1, 1)
-		wait(0.03)
+		task.wait(0.03)
 	end
 end)
 
@@ -85,7 +84,7 @@ Criador.TextSize = 14
 Criador.TextColor3 = Color3.fromRGB(200, 200, 200)
 Criador.Parent = MainFrame
 
--- Função criar botão
+-- Função criar botão do hub
 local function CriarBotao(nome, ordem, callback)
 	local Botao = Instance.new("TextButton")
 	Botao.Size = UDim2.new(0.9, 0, 0, 30)
@@ -103,7 +102,6 @@ local function CriarBotao(nome, ordem, callback)
 
 	Botao.MouseButton1Click:Connect(callback)
 end
-
 
 -- Função ESP Players
 local function ESPPlayers()
@@ -141,29 +139,128 @@ end)
 CriarBotao("Lennon Tween", 3, function()
 	loadstring(game:HttpGet("https://pastefy.app/J3oDjwQ5/raw"))()
 end)
-CriarBotao("ESP Players", 4, ESPPlayers) -- botão ESP Players
+CriarBotao("ESP Players", 4, ESPPlayers)
 
--- Botão de abrir/fechar Hub (inicia invisível)
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(0, 120, 0, 40)
-ToggleButton.Position = UDim2.new(0, 20, 0.8, 0)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.Text = "Abrir/Fechar Hub"
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.TextSize = 14
+---------------------------------------------------------------------
+-- Botão de abrir/fechar Hub (ImageButton top-right, hover, RGB, draggable)
+---------------------------------------------------------------------
+local ToggleButton = Instance.new("ImageButton")
+ToggleButton.Name = "FrostzToggle"
+ToggleButton.Size = UDim2.new(0, 60, 0, 60) -- ✅ tamanho base 60x60
+ToggleButton.AnchorPoint = Vector2.new(1, 0)
+ToggleButton.Position = UDim2.new(1, -20, 0, 20)
+ToggleButton.BackgroundTransparency = 1
+ToggleButton.AutoButtonColor = false
+ToggleButton.Image = "rbxassetid://119234269022437" -- ✅ sua logo
+ToggleButton.ImageTransparency = 0
 ToggleButton.Visible = false
 ToggleButton.Parent = ScreenGui
 
+-- Borda RGB
+local Stroke = Instance.new("UIStroke")
+Stroke.Thickness = 2
+Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+Stroke.Parent = ToggleButton
+
+-- Canto arredondado
 local corner2 = Instance.new("UICorner")
-corner2.CornerRadius = UDim.new(0, 10)
+corner2.CornerRadius = UDim.new(1, 0)
 corner2.Parent = ToggleButton
 
+-- Animação borda RGB
+task.spawn(function()
+	local hue = 0
+	while ToggleButton and ToggleButton.Parent do
+		hue = (hue + 1) % 360
+		Stroke.Color = Color3.fromHSV(hue/360, 1, 1)
+		task.wait(0.03)
+	end
+end)
+
+-- Abrir/fechar hub
 ToggleButton.MouseButton1Click:Connect(function()
 	MainFrame.Visible = not MainFrame.Visible
 end)
 
+-- Hover efeito (zoom pra 68x68)
+local normalSize = ToggleButton.Size
+local hoverSize  = UDim2.new(0, 68, 0, 68) -- ✅ hover 68x68
+local normalColor = Color3.new(1,1,1)
+local hoverColor  = Color3.new(1,1,1)
+
+local sizeTweenInfo  = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local colorTweenInfo = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+local function tweenHover(on)
+	TweenService:Create(ToggleButton, sizeTweenInfo, { Size = on and hoverSize or normalSize }):Play()
+	TweenService:Create(Stroke, sizeTweenInfo, { Thickness = on and 3 or 2 }):Play()
+	TweenService:Create(ToggleButton, colorTweenInfo, { ImageColor3 = on and hoverColor or normalColor }):Play()
+end
+
+ToggleButton.MouseEnter:Connect(function() tweenHover(true) end)
+ToggleButton.MouseLeave:Connect(function() tweenHover(false) end)
+
+-- Draggable com limites
+local dragging = false
+local dragStart
+local startPos
+
+local function clampToViewport(px, py)
+	local vp = Camera.ViewportSize
+	local minX, maxX = 10, vp.X - 10
+	local minY, maxY = 10, vp.Y - 10
+	px = math.clamp(px, minX, maxX)
+	py = math.clamp(py, minY, maxY)
+	return px, py
+end
+
+local function update(input)
+	if not dragging then return end
+	local delta = input.Position - dragStart
+	local newX = startPos.X.Offset + delta.X
+	local newY = startPos.Y.Offset + delta.Y
+	newX, newY = clampToViewport(newX, newY)
+	ToggleButton.Position = UDim2.new(0, newX, 0, newY)
+end
+
+ToggleButton.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos  = ToggleButton.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+ToggleButton.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch then
+		update(input)
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch) then
+		update(input)
+	end
+end)
+
+Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+	local px = ToggleButton.Position.X.Offset
+	local py = ToggleButton.Position.Y.Offset
+	px, py = clampToViewport(px, py)
+	ToggleButton.Position = UDim2.new(0, px, 0, py)
+end)
+
+---------------------------------------------------------------------
 -- Sistema de Key
+---------------------------------------------------------------------
 local function CriarTelaKey()
 	local KeyFrame = Instance.new("Frame")
 	KeyFrame.Size = UDim2.new(0, 300, 0, 150)
