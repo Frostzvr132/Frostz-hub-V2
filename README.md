@@ -335,7 +335,7 @@ if SavedKey then
 			break
 		end
 	end
-end
+end 
 
 if not isValid then
 	CriarTelaKey()
