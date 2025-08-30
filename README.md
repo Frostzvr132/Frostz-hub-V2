@@ -131,7 +131,7 @@ end
 
 -- Criando botões do hub
 CriarBotao("Miranda Tween", 1, function()
-	loadstring(game:HttpGet("https://pastefy.app/TnWWJ4NS/raw"))()
+	loadstring(game:HttpGet("https://pastefy.app/9YIyWc7E/raw"))()
 end)
 CriarBotao("Miranda Hop", 2, function()
 	loadstring(game:HttpGet("https://gist.githubusercontent.com/Kauaicaro10-12/a3a950be0b587bc41dd927713633005e/raw/79e5d795393de33181b889fe0d57fb56fd741df8/MIRANDAHOP23do07.lua"))()
